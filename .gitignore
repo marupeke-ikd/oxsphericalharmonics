@@ -1,0 +1,10 @@
+lib/
+prj/oxsphericalharmonics/.vs/
+prj/oxsphericalharmonics/Debug/
+prj/oxsphericalharmonics/oxsphericalharmonics/oxsphericalharmonics.vcxproj.filters
+prj/oxsphericalharmonics/oxsphericalharmonics/oxsphericalharmonics.vcxproj.user
+prj/oxsphericalharmonics/oxsphericalharmonics/Debug/
+prj/oxsphericalharmonics/oxsphericalharmonics/x64/Debug/
+prj/oxsphericalharmonics/oxsphericalharmonics/x64/Release/
+prj/oxsphericalharmonics/x64/Debug/
+prj/oxsphericalharmonics/x64/Release/

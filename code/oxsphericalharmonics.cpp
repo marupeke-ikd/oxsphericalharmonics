@@ -184,7 +184,7 @@ namespace OX {
 					pitchByte * width + 3 * width * bpc,	// NZ
 				};
 				uint8_t *ptr = hznImage.p();
-				memset( ptr, 0xff, hznImage.size() );
+				memset( ptr, 0x00, hznImage.size() );
 				uint32_t lineByte = width * bpc;
 				for ( uint32_t i = 0; i < 6; ++i ) {
 					uint8_t *dest = ptr + offsetsByte[ i ];
@@ -444,7 +444,7 @@ namespace OX {
 			for ( size_t i = 0; i < fileNames.size(); ++i ) {
 				ImageBlock block = ImageUtil::createImageBlockFromFile( fileNames[ i ].c_str() );
 				if ( block.isExist() == false ) {
-					ss << "invalid file format. [" << fileNames[ i ] << "]";
+					ss << "invalid file. [" << fileNames[ i ] << "]";
 					return Error( ss.str() );
 				}
 				if (

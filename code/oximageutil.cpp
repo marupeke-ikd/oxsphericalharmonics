@@ -1,4 +1,7 @@
 #include "oximageutil.h"
+#include "oxfileutil.h"
+#include <algorithm>
+#include <cctype>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -104,25 +107,30 @@ namespace OX {
 
 		int x, y, n;
 		unsigned char* data = stbi_load( filePath, &x, &y, &n, 0 );
+		if ( data == 0 )
+			return ImageBlock();
 		return ImageBlock( new ImageBlockBody( data, x, y, n ) );
 	}
 
 	// ImageBlock‚©‚ç‰æ‘œƒtƒ@ƒCƒ‹‚É
-	bool ImageUtil::createFileFromImageBlock( const ImageBlock &block, const char* filePath, Format format, int jpegQuarity ) {
+	bool ImageUtil::createFileFromImageBlock( const ImageBlock &block, const char* filePath, int jpegQuarity ) {
 		int res = 0;
-		switch ( format ) {
-		case Format::BMP:
+		std::string ext = OX::FileUtil::getExtName( filePath );
+		if ( ext == "" )
+			return false;
+
+		// lower‚É
+		std::transform( ext.begin(), ext.end(), ext.begin(),
+			[]( unsigned char c ) { return std::tolower( c ); } );
+
+		if ( ext == "bmp" ) {
 			res = stbi_write_bmp( filePath, block.width(), block.height(), block.bytePerColor(), block.p() );
-			break;
-		case Format::PNG:
+		} else if ( ext == "png" ) {
 			res = stbi_write_png( filePath, block.width(), block.height(), block.bytePerColor(), block.p(), 0 );
-			break;
-		case Format::JPEG:
+		} else if ( ext == "jpg" ) {
 			res = stbi_write_jpg( filePath, block.width(), block.height(), block.bytePerColor(), block.p(), jpegQuarity );
-			break;
-		case Format::TGA:
+		} else if ( ext == "tga" ) {
 			res = stbi_write_tga( filePath, block.width(), block.height(), block.bytePerColor(), block.p() );
-			break;
 		}
 		return res != 0;
 	}

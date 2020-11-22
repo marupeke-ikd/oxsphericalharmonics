@@ -55,7 +55,7 @@ namespace OX {
 
 		// ImageBlockから画像ファイルに
 		//  jpegQuarity : JPEGのクオリティーレベル(0-100)。他の形式では無視。
-		static bool createFileFromImageBlock( const ImageBlock &block, const char* filePath, Format format, int jpegQuarity = 100 );
+		static bool createFileFromImageBlock( const ImageBlock &block, const char* filePath, int jpegQuarity = 100 );
 	};
 }
 #endif

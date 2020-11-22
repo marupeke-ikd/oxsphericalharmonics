@@ -1,6 +1,8 @@
 #include "oxsphericalharmonics.h"
 #include <math.h>
 #include <sstream>
+#include <fstream>
+#include <iomanip>
 
 namespace OX {
 	namespace {
@@ -487,5 +489,120 @@ namespace OX {
 		uint32_t CubeDataFromImage::getTexelSize() const {
 			return images_[ 0 ].width();
 		}
-	}
-}
+
+
+
+
+
+		OutputResult::OutputResult() {
+		}
+
+		OutputResult::~OutputResult() {
+		}
+
+		Error OutputResult::output( const Result& result, const char* filePath ) {
+			uint32_t maxLevel = result.getMaxLevel();
+			const auto& listR = result.getParamList( ColorType_R );
+			const auto& listG = result.getParamList( ColorType_G );
+			const auto& listB = result.getParamList( ColorType_B );
+
+			if ( listR.size() == 0 ) {
+				return Error( "no estimated parameter." );
+			}
+
+			Header header;
+			header.hederSize_ = sizeof( Header );
+			header.componentListNum_ = (uint32_t)listR.size();
+			header.containAlpha_ = 0;
+			header.maxOrderLevel_ = maxLevel;
+			header.reserved_ = 0;
+
+			uint32_t dataSize = sizeof( Header ) + header.componentListNum_ * 3 * sizeof( double );
+			uint8_t* dataBlock = new uint8_t[ dataSize ];
+			uint8_t* p = dataBlock;
+			memcpy( p, &header, sizeof( header ) );
+			p += sizeof( header );
+
+			for ( uint32_t i = 0; i < listR.size(); ++i ) {
+				double v = listR[ i ].value();
+				memcpy( p, &v, sizeof( double ) );
+				p += sizeof( double );
+			}
+
+			for ( uint32_t i = 0; i < listG.size(); ++i ) {
+				double v = listG[ i ].value();
+				memcpy( p, &v, sizeof( double ) );
+				p += sizeof( double );
+			}
+
+			for ( uint32_t i = 0; i < listB.size(); ++i ) {
+				double v = listB[ i ].value();
+				memcpy( p, &v, sizeof( double ) );
+				p += sizeof( double );
+			}
+
+			std::ofstream ofs( filePath, std::ios_base::out | std::ios_base::binary );
+			if ( ofs.is_open() == false ) {
+				delete[] dataBlock;
+				std::stringstream ss;
+				ss << "failed to open output file. [" << filePath << "]";
+				return Error( ss.str() );
+			}
+			ofs.write( (const char*)dataBlock, dataSize );
+
+			delete[] dataBlock;
+			return Error();
+		}
+
+
+
+
+		OutputResultText::OutputResultText() {
+		}
+
+		OutputResultText::~OutputResultText() {
+		}
+
+		Error OutputResultText::output( const Result& result, const char* filePath ) {
+			uint32_t maxLevel = result.getMaxLevel();
+			const auto& listR = result.getParamList( ColorType_R );
+			const auto& listG = result.getParamList( ColorType_G );
+			const auto& listB = result.getParamList( ColorType_B );
+
+			if ( listR.size() == 0 ) {
+				return Error( "no estimated parameter." );
+			}
+
+			std::ofstream ofs( filePath );
+			if ( ofs.is_open() == false ) {
+				std::stringstream ss;
+				ss << "failed to open output file. [" << filePath << "]";
+				return Error( ss.str() );
+			}
+
+			ofs
+				<< "max_order_level=" << maxLevel << std::endl
+				<< "component_list_num=" << listR.size() << std::endl
+				<< "contain_alpha=" << 0 << std::endl;
+
+			ofs << "R" << std::endl;
+			for ( uint32_t i = 0; i < listR.size(); ++i ) {
+				double v = listR[ i ].value();
+				ofs << std::setprecision( 15 ) << v << std::endl;
+			}
+			ofs << "G" << std::endl;
+			for ( uint32_t i = 0; i < listG.size(); ++i ) {
+				double v = listG[ i ].value();
+				ofs << std::setprecision( 15 ) << v << std::endl;
+			}
+			ofs << "B" << std::endl;
+			for ( uint32_t i = 0; i < listB.size(); ++i ) {
+				double v = listB[ i ].value();
+				ofs << std::setprecision( 15 ) << v << std::endl;
+			}
+			return Error();
+		}
+
+
+	} // end namespace SphericalHarmonics
+} // end namespace OX

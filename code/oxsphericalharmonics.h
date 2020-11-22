@@ -41,12 +41,12 @@ namespace OX {
 		class CubeData {
 		public:
 			enum Face {
-				XP,	// X+
-				XM,	// X-
-				YP,	// Y+
-				YM,	// Y-
-				ZP,	// Z+
-				ZM,	// Z-
+				PX,	// X+
+				NX,	// X-
+				PY,	// Y+
+				NY,	// Y-
+				PZ,	// Z+
+				NZ,	// Z-
 				Face_Num
 			};
 
@@ -217,6 +217,30 @@ namespace OX {
 
 		private:
 			ImageBlock images_[ 6 ];
+		};
+
+		// パラメータ出力
+		class OutputResult {
+		public:
+			OutputResult();
+			virtual ~OutputResult();
+			virtual Error output( const Result &result, const char* filePath );
+
+		private:
+			struct Header {
+				uint32_t hederSize_ = 0;		// ヘッダーサイズ
+				uint32_t maxOrderLevel_ = 0;
+				uint32_t componentListNum_ = 0;	// 各色のリスト数
+				uint32_t containAlpha_ = 0;		// αがある場合は1
+				uint32_t reserved_ = 0;			// 予約領域
+			};
+		};
+
+		class OutputResultText : public OutputResult {
+		public:
+			OutputResultText();
+			virtual ~OutputResultText();
+			virtual Error output( const Result& result, const char* filePath );
 		};
 
 		// 球面調和関数群を作成

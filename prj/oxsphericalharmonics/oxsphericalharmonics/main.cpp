@@ -12,14 +12,17 @@ int main(int argc, char** argv)
 	std::string fileBaseName("");
 	std::string ext("");
 	std::string cubeMapFileName("");
+	std::string outputParamFileName("");
 	bool showProcess = false;
+	bool outputAsText = false;
 	cxxopts::Options options("oxsphericalharmonics.exe", "OX Spheric Harmonics Parameter Estimation (v1.00)");
 	options.add_options()
 		("l,level", "SH band level (def=3)", cxxopts::value< int32_t >(level))
 		("f,file", "Base file name of src image. ('hoge.bmp' -> hoge_l.bmp, hoge_r.bmp and so on.", cxxopts::value< std::string >(fileBaseName))
-		("o,output", "Output file name of estimated parameter  (hoge.dat)")
-		("c,cubemap", "Output file name of test cube map (cubemap.bmp)", cxxopts::value< std::string >( cubeMapFileName ) )
-		("p,process", "Show estimate process (def=false)", cxxopts::value< bool >( showProcess ) )
+		("o,output", "Output file name of estimated parameter (hoge.dat)", cxxopts::value< std::string >( outputParamFileName ) )
+		("t,text", "Output estimated parameter as text (option)", cxxopts::value< bool >( outputAsText ) )
+		("c,cubemap", "Output file name of test cube map (option) ('cubemap.bmp')", cxxopts::value< std::string >( cubeMapFileName ) )
+		("p,proc", "Show estimate process (option, def=false)", cxxopts::value< bool >( showProcess ) )
 		("h,help", "Print help")
 		;
 	auto res = options.parse(argc, argv);
@@ -52,13 +55,13 @@ int main(int argc, char** argv)
 
 	// 入力ファイル名を作成しファイルをチェック
 	std::vector< std::string > fileNames;
-	const char* sufix[] = {
+	const char* suffix[] = {
 		"_px", "_nx", "_py", "_ny", "_pz", "_nz"
 	};
 	ext = OX::FileUtil::getExtName( fileBaseName, true );
 	fileBaseName = OX::FileUtil::getBaseName( fileBaseName, false );
 	for ( int32_t i = 0; i < 6; ++i ) {
-		fileNames.push_back( fileBaseName + sufix[ i ] + ext );
+		fileNames.push_back( fileBaseName + suffix[ i ] + ext );
 	}
 
 	// 指定キューブマップファイルを取り込み
@@ -70,8 +73,9 @@ int main(int argc, char** argv)
 		return -1;
 	}
 
-	printf( "Estimate SH parameters.\n" );
-
+	// パラメータ推定
+	printf( "Estimate SH parameters from %s.\n", fileBaseName.c_str() );
+	printf( " level=%u, output as %s\n", level, outputAsText ? "text" : "binary" );
 	CubeEstimater cubeEst( level );
 	Result shRes;
 	err = cubeEst.estimate( &cubeData, shRes, [ showProcess ]( uint64_t count, uint64_t procCount ) {
@@ -83,6 +87,11 @@ int main(int argc, char** argv)
 		std::cout << "estimate error: " << err.reason_ << std::endl;
 		return -1;
 	}
+
+	// パラメータ出力
+	printf( "Output parameters.\n" );
+	std::shared_ptr< OutputResult > output( outputAsText ? new OutputResultText : new OutputResult );
+	output->output( shRes, outputParamFileName.c_str() );
 
 	// テストキューブマップ出力
 	if ( cubeMapFileName != "" ) {

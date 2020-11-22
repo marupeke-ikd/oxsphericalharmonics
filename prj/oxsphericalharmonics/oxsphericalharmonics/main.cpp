@@ -10,7 +10,6 @@ int main(int argc, char** argv)
 	// オプション
 	int32_t level = 3;
 	std::string fileBaseName("");
-	std::string ext("");
 	std::string cubeMapFileName("");
 	std::string outputParamFileName("");
 	bool showProcess = false;
@@ -58,7 +57,7 @@ int main(int argc, char** argv)
 	const char* suffix[] = {
 		"_px", "_nx", "_py", "_ny", "_pz", "_nz"
 	};
-	ext = OX::FileUtil::getExtName( fileBaseName, true );
+	std::string ext = OX::FileUtil::getExtName( fileBaseName, true );
 	fileBaseName = OX::FileUtil::getBaseName( fileBaseName, false );
 	for ( int32_t i = 0; i < 6; ++i ) {
 		fileNames.push_back( fileBaseName + suffix[ i ] + ext );
